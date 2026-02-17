@@ -1,0 +1,27 @@
+[project]
+name = "mcpx"
+version = "0.1.0"
+description = "A stateless CLI proxy that maps shell commands to MCP JSON-RPC calls"
+readme = "README.md"
+authors = [
+    { name = "bes-dev", email = "sergei.o.belousov@gmail.com" }
+]
+license = {text = "Apache-2.0"}
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.14.3",
+    "click>=8.3.1",
+    "jsonschema>=4.26.0",
+    "litellm>=1.81.13",
+    "mcp[cli]>=1.26.0",
+    "pydantic>=2.12.5",
+    "python-dotenv>=1.2.1",
+    "rich>=14.3.2",
+]
+
+[project.scripts]
+mcpx = "mcpx.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
