@@ -1,6 +1,6 @@
 # mcpx
 
-A stateless CLI proxy that maps shell commands to [MCP](https://modelcontextprotocol.io/) JSON-RPC calls over stdio.
+Nano-agent that turns any MCP server into a shell command.
 
 ```
 mcpx <server> <tool> [ARGS] | jq .
@@ -17,8 +17,11 @@ uv tool install .
 ## Quick Start
 
 ```bash
-# Register a server
-mcpx add weather --command uv --args run --args weather_server.py --env API_KEY=sk-xxx
+# Register a server manually
+mcpx add weather --command npx --args -y --args @example/weather-mcp
+
+# Or let the agent figure it out from a URL
+mcpx install https://github.com/example/weather-mcp
 
 # List servers
 mcpx list
@@ -42,6 +45,30 @@ mcpx weather get_forecast --city "Berlin" --dry-run
 mcpx remove weather
 ```
 
+## AI-powered install
+
+`mcpx install` takes a URL (GitHub, npm, PyPI, mcpservers.org, etc.), fetches the repo, finds the package name, verifies it on a registry, and registers the server — all via an LLM agent.
+
+```bash
+mcpx install https://github.com/modelcontextprotocol/servers/tree/main/src/time
+
+# Analyzing https://github.com/... with claude-sonnet-4-20250514...
+#   Step 1: fetch_url(url='https://github.com/...')
+#   Step 2: fetch_url(url='https://raw.githubusercontent.com/.../package.json')
+#   Step 3: search_npm(package_name='@modelcontextprotocol/server-time')
+#   Step 4: install_server(alias='time', command='npx', ...)
+#
+# Generated command: mcpx add time --command npx --args -y --args @modelcontextprotocol/server-time
+# Proceed? [y/N]: y
+# Server time added.
+```
+
+Configure the LLM model:
+
+```bash
+mcpx config-llm --model claude-sonnet-4-20250514
+```
+
 ## Configuration
 
 Server configs are stored in `~/.config/mcpx/config.json`:
@@ -49,11 +76,10 @@ Server configs are stored in `~/.config/mcpx/config.json`:
 ```json
 {
   "servers": {
-    "weather": {
-      "command": "uv",
-      "args": ["run", "weather_server.py"],
-      "env": {"API_KEY": "..."},
-      "env_file": "/path/to/.env",
+    "time": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-time"],
+      "env": {},
       "timeout": 30
     }
   }
